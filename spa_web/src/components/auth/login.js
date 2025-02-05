@@ -1,4 +1,4 @@
-import { Axios } from "axios";
+import axios from "axios";
 import { useState } from "react";
 import { Button, Checkbox, Form, Input, Col, Row } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
@@ -9,9 +9,17 @@ const Login = ({ onLogin }) => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const onFinish = (values) => {
+    const onFinish = async (values) => {
         console.log('Success:', values);
+        const requestData = {
+            email: email,
+            password: password
+        }
+        await axios.post("http://localhost:8000/users", requestData).then((res) => {
+            console.log(res.data.users, "users");
+        })
     };
+
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
@@ -20,7 +28,7 @@ const Login = ({ onLogin }) => {
         setError("");
 
         try {
-            const response = await Axios.post("https://your-api-url.com/login", {
+            const response = await axios.post("http://localhost:8000/api", {
                 email,
                 password,
             });
@@ -43,7 +51,7 @@ const Login = ({ onLogin }) => {
                     <Form name="basic"
                         style={{
                             maxWidth: 400,
-                            padding:23
+                            padding: 23
                         }}
                         initialValues={{
                             remember: true,
@@ -58,7 +66,7 @@ const Login = ({ onLogin }) => {
                                     name="email"
                                     rules={[
                                         {
-                                            type:'email',
+                                            type: 'email',
                                             required: true,
                                             message: 'Please enter your email!',
                                         },
