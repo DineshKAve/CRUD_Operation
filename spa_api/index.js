@@ -1,171 +1,9 @@
-// const express = require("express");
-// const swaggerJsdoc = require("swagger-jsdoc");
-// const swaggerUi = require("swagger-ui-express");
-// const bodyParser = require("body-parser");
-// const cors = require('cors');
-// const app = express();
-// const port = 8000;
-
-// app.use(bodyParser.json()); // Middleware to parse JSON requests
-// app.use(cors({ origin: "http://localhost:8000" }));
-
-// // Sample data (simulating a database)
-// let users = [
-//   { id: 1, name: "John Doe" },
-//   { id: 2, name: "Jane Smith" },
-// ];
-
-// // Swagger options
-// const swaggerOptions = {
-//   definition: {
-//     openapi: "3.0.0",
-//     info: {
-//       title: "User API",
-//       version: "1.0.0",
-//       description: "A simple CRUD API using Express.js and Swagger",
-//     },
-//     servers: [
-//       {
-//         url: "http://localhost:8000",
-//       },
-//     ],
-//   },
-//   apis: ["./index.js"], // Path to the API docs
-// };
-
-// // Initialize Swagger docs
-// const swaggerDocs = swaggerJsdoc(swaggerOptions);
-// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// /**
-//  * @swagger
-//  * /users:
-//  *   get:
-//  *     summary: Get all users
-//  *     responses:
-//  *       200:
-//  *         description: A list of users
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: array
-//  *               items:
-//  *                 type: object
-//  *                 properties:
-//  *                   id:
-//  *                     type: integer
-//  *                   name:
-//  *                     type: string
-//  */
-// app.get("/users", (req, res) => {
-//   res.json(users);
-// });
-
-// /**
-//  * @swagger
-//  * /users:
-//  *   post:
-//  *     summary: Create a new user
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               name:
-//  *                 type: string
-//  *     responses:
-//  *       201:
-//  *         description: User created
-//  *       400:
-//  *         description: Invalid input
-//  */
-// app.post("/users", (req, res) => {
-//   const { email } = req.body;
-//   if (!email) return res.status(400).json({ message: "Email is required" });
-
-//   const newUser = { id: users.length + 1, email };
-//   users.push(newUser);
-//   res.status(201).json(newUser);
-// });
-
-// /**
-//  * @swagger
-//  * /users/{id}:
-//  *   put:
-//  *     summary: Update a user by ID
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               name:
-//  *                 type: string
-//  *     responses:
-//  *       200:
-//  *         description: User updated
-//  *       400:
-//  *         description: Invalid input
-//  *       404:
-//  *         description: User not found
-//  */
-// app.put("/users/:id", (req, res) => {
-//   const user = users.find((u) => u.id === parseInt(req.params.id));
-//   if (!user) return res.status(404).json({ message: "User not found" });
-
-//   const { name } = req.body;
-//   if (!name) return res.status(400).json({ message: "Namessput is required" });
-
-//   user.name = name;
-//   res.json(user);
-// });
-
-// /**
-//  * @swagger
-//  * /users/{id}:
-//  *   delete:
-//  *     summary: Delete a user by ID
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *     responses:
-//  *       200:
-//  *         description: User deleted
-//  *       404:
-//  *         description: User not found
-//  */
-// app.delete("/users/:id", (req, res) => {
-//   const userIndex = users.findIndex((u) => u.id === parseInt(req.params.id));
-//   if (userIndex === -1) return res.status(404).json({ message: "User not found" });
-
-//   users.splice(userIndex, 1);
-//   res.json({ message: "User deleted" });
-// });
-
-// app.listen(port, () => {
-//   console.log(`Server is running at http://localhost:${port}`);
-//   console.log(`Swagger docs available at http://localhost:${port}/api-docs`);
-// });
-
-
-
-
 const express = require('express');
+const multer = require("multer");
 const app = express();
 const port = 8000;
 const cors = require('cors');
+const path = require("path");
 const bodyParser = require("body-parser");
 
 app.use(
@@ -178,10 +16,11 @@ app.use(
 
 app.use(bodyParser.json());
 
+//---------Login Concept Start------------------------
+
 const VALID_EMAIL = "admin@123.com";
 const VALID_PASSWORD = "password123";
 
-let users = [];
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
 
@@ -196,16 +35,107 @@ app.post("/login", (req, res) => {
     }
 });
 
-app.get("/users", (req, res) => {
-    res.json({ "users": users })
+//---------Login Concept End------------------------
+
+
+//---------Get Method Concept Start------------------------
+
+app.get("/getUsersList", (req, res) => {
+    res.status(200).json({ data: storedUsersData });
 });
 
-app.delete("/users/:id", (req, res) => {
-    let id = Number(req.params.id);
-    let filteredUsers = users.filter((user) => {
-        user.id !== id
-    })
+//---------Get Method Concept End------------------------
+
+
+//---------Post Method Concept Start------------------------
+
+let storedUsersData = [];
+app.post("/addUsers", (req, res) => {
+    const { firstname, lastname, email, url } = req.body;
+
+    if (!firstname || !lastname || !email || !url) {
+        return res.status(400).json({ error: "All fields are required!" });
+    }
+
+    const newData = { id: storedUsersData.length + 1, firstname, lastname, email, url };
+    storedUsersData.push(newData);
+
+    console.log("Data Stored:", newData);
+    res.status(200).json({ status: 1, message: "User added successfully", data: newData });
 });
+
+//---------Post Method Concept End------------------------
+
+
+//---------Put Method Concept Start------------------------
+
+app.put("/updateUsers/:id", (req, res) => {
+    const { id } = req.params;
+    const { firstname, lastname, email, url } = req.body;
+
+    const index = storedUsersData.findIndex(item => item.id === parseInt(id));
+
+    if (index === -1) {
+        return res.status(404).json({ error: "Data not found!" });
+    }
+
+    storedUsersData[index] = { id: parseInt(id), firstname, lastname, email, url };
+
+    console.log("Data Updated:", storedUsersData[index]);
+    res.status(200).json({ status: 1, message: "User updated successfully", data: storedUsersData[index] });
+});
+
+//---------Put Method Concept End------------------------
+
+
+//---------Delete Method Concept Start------------------------
+
+app.delete("/deleteUsers/:id", (req, res) => {
+    const { id } = req.params;
+
+    const index = storedUsersData.findIndex(item => item.id === parseInt(id));
+
+    if (index === -1) {
+        return res.status(404).json({ error: "Data not found!" });
+    }
+
+    const deletedItem = storedUsersData.splice(index, 1); // Remove item from array
+
+    console.log("Data Deleted:", deletedItem);
+    res.status(200).json({ status: 1, message: "User deleted successfully", data: deletedItem });
+});
+
+//---------Delete Method Concept End------------------------
+
+
+//---------File Upload Method Start------------------------
+
+const storage = multer.diskStorage({
+    destination: "uploads/", // Save files in the "uploads" folder
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Rename file with timestamp
+    },
+});
+
+const upload = multer({ storage });
+
+// File upload route
+app.post("/upload", upload.single("file"), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    res.json({
+        message: "File uploaded successfully",
+        filePath: `http://localhost:8000/uploads/${req.file.filename}`,
+    });
+});
+
+// Serve uploaded files statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+//---------File Upload Method End------------------------
+
 
 app.listen(port, () => {
     console.log("Server started on port 8000");

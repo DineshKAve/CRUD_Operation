@@ -18,3 +18,12 @@
 .userlist_card {
     padding: 10px;
 }
+
+.userlist_fileupload {
+    position: absolute;
+    z-index: 999;
+    top: 7px;
+    right: 0px;
+    width: 45px;
+    opacity: 0;
+}
