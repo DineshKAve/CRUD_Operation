@@ -6,14 +6,13 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import "./login.css";
 
 const Login = ({ onLogin }) => {
+    const API_URL = "http://localhost:8000";
     const navigate = useNavigate();
-    const { Text, Link } = Typography;
+    const { Text } = Typography;
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
     const [errormsgs, setErrormgs] = useState(false);
     const [inCorrectError, setInCorrectError] = useState("");
-    const API_URL = "http://localhost:8000";
 
 
     const onFinish = async (values) => {
@@ -28,8 +27,8 @@ const Login = ({ onLogin }) => {
                 await axios.post(`${API_URL}/login`, requestData).then((response) => {
                     if (response.data.status == 1) {
                         setErrormgs(false);
-                        navigate('/users');
-                        console.log(response.data, "users");
+                        localStorage.setItem("userId", response.data.status);
+                        navigate('/usersList');
                         return response.data;
                     } else {
                         setErrormgs(true);
@@ -49,26 +48,6 @@ const Login = ({ onLogin }) => {
 
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
-    };
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-
-        try {
-            const response = await axios.post("http://localhost:8000/api", {
-                email,
-                password,
-            });
-
-            if (response.data.success) {
-                onLogin(response.data);
-            } else {
-                setError("Invalid email or password");
-            }
-        } catch (err) {
-            setError("Login failed. Please try again.");
-            console.error("Login error:", err);
-        }
     };
 
     return (

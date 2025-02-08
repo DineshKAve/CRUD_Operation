@@ -1,32 +1,37 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Space, Form, Input, Col, Row, Typography, Modal, Table, notification, Popconfirm } from 'antd';
+import { Button, Space, Form, Input, Col, Row, Typography, Modal, Table, notification, Popconfirm, Skeleton } from 'antd';
 import { TableOutlined, UnorderedListOutlined, UploadOutlined } from '@ant-design/icons';
 import axios from "axios";
 import './userList.css';
 
 const UserList = () => {
+    const API_URL = "http://localhost:8000";
+    const navigate = useNavigate();
     const { Text, Link } = Typography;
+    const [form] = Form.useForm();
     const [table, setTable] = useState(true);
     const [card, setCard] = useState(false);
     const [filteredData, setFilteredData] = useState([]);
-    const [usersListData, setUsersListData] = useState([]);
     const [dataSource, setDataSource] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const navigate = useNavigate();
-    const [form] = Form.useForm();
     const [fileName, setFileName] = useState('');
     const [editUserID, setEditUserID] = useState(null);
     const [editingUser, setEditingUser] = useState(null);
-    const API_URL = "http://localhost:8000";
+    const [loading, setLoading] = useState(false);
     const [api, contextHolder] = notification.useNotification();
     const openNotificationWithIcon = (type, msgs) => {
         api[type]({
             message: msgs,
         });
     };
+
     useEffect(() => {
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+        }, 2000);
         getUserLists();
     }, []);
 
@@ -80,40 +85,9 @@ const UserList = () => {
         },
     ];
 
-    const data = [
-        {
-            key: 1,
-            profile: 'John Brown',
-            email: 'kdinesh@12.com',
-            firstname: 'Dinesh',
-            lastname: 'K',
-        },
-        {
-            key: 2,
-            profile: 'John Brown',
-            email: 'kdinesh@12.com',
-            firstname: 'Dinesh',
-            lastname: 'K',
-        },
-        {
-            key: 3,
-            profile: 'John Brown',
-            email: 'kdinesh@12.com',
-            firstname: 'Dinesh',
-            lastname: 'K',
-        },
-        {
-            key: 4,
-            profile: 'John Brown',
-            email: 'kdinesh@12.com',
-            firstname: 'Dinesh',
-            lastname: 'K',
-        },
-    ];
-
     const handleFileChange = async (event) => {
         if (!event.target.files[0]) {
-            alert("Please select a file first!");
+            openNotificationWithIcon('warning', "Please select a file first!");
             return;
         }
 
@@ -148,11 +122,9 @@ const UserList = () => {
     };
 
     const EditModelOpen = (data) => {
-        debugger;
         form.resetFields();
         setFileName('');
         setEditUserID('');
-        console.log(data, "datavlue");
         setEditingUser(data);
         form.setFieldsValue({
             url: data.profile,
@@ -170,9 +142,6 @@ const UserList = () => {
     };
 
     const handleSubmit = async (values) => {
-        debugger;
-        console.log(values, "98765");
-
         let userDetails = {
             firstname: values.firstname,
             lastname: values.lastname,
@@ -182,7 +151,6 @@ const UserList = () => {
         try {
             await axios.post(`${API_URL}/addUsers`, userDetails).then((response) => {
                 if (response.data.status == 1) {
-                    console.log(response.data, "users");
                     setModalOpen(false);
                     openNotificationWithIcon('success', "User added successfully!");
                     getUserLists();
@@ -198,8 +166,6 @@ const UserList = () => {
     };
 
     const handleUpdateSubmit = async (values) => {
-        debugger;
-        console.log(values, "98765");
 
         let userDetails = {
             firstname: values.firstname,
@@ -210,7 +176,6 @@ const UserList = () => {
         try {
             await axios.put(`${API_URL}/updateUsers/${editUserID}`, userDetails).then((response) => {
                 if (response.data.status == 1) {
-                    console.log(response.data, "users");
                     setEditModalOpen(false);
                     openNotificationWithIcon('success', "User updated successfully!");
                     getUserLists();
@@ -226,7 +191,6 @@ const UserList = () => {
     };
 
     const getUserLists = async () => {
-        debugger;
         const response = await axios.get(`${API_URL}/getUsersList`);
         let usersListData = [];
         usersListData.push(response.data.data);
@@ -244,10 +208,8 @@ const UserList = () => {
     };
 
     const handleDelete = async (value) => {
-        debugger;
         await axios.delete(`${API_URL}/deleteUsers/${value.key}`).then((response) => {
             if (response.data.status == 1) {
-                console.log(response.data, "users");
                 setEditModalOpen(false);
                 openNotificationWithIcon('success', "User deleted successfully!");
                 getUserLists();
@@ -258,17 +220,16 @@ const UserList = () => {
     };
 
     const handleToggle = (data) => {
-        debugger;
         if (data == 'card') {
             setTable(false);
             setCard(true);
+            navigate('/usersView');
         } else if (data == 'table') {
             setCard(false);
             setTable(true);
         }
     }
     const handleSearch = (value) => {
-        debugger;
         const searchText = value.toLowerCase();
         const filtered = dataSource.filter((user) =>
             user.firstname.toLowerCase().includes(searchText) ||
@@ -280,8 +241,6 @@ const UserList = () => {
             setDataSource(filtered);
         }
     };
-
-
 
     return (
         <>
@@ -322,8 +281,17 @@ const UserList = () => {
                         <Col xs={12} sm={12} md={16} lg={18} xl={20} style={{ paddingTop: '10px' }}></Col>
                     </Row>
                     <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                        {dataSource.length <= 0 ? <Table columns={columns} dataSource={dataSource} /> :
-                            <Table columns={columns} dataSource={dataSource} loading={dataSource.length === 0} />}
+                        {dataSource.length <= 0 ?
+                            <Space direction="vertical" style={{ width: '100%' }} size={16}>
+                                <Skeleton loading={loading}>
+                                    <Table columns={columns} dataSource={dataSource} />
+                                </Skeleton>
+                            </Space> :
+                            <Space direction="vertical" style={{ width: '100%' }} size={16}>
+                                <Skeleton loading={loading}>
+                                    <Table columns={columns} dataSource={dataSource} loading={dataSource.length === 0} />
+                                </Skeleton>
+                            </Space>}
                     </Col>
                     <Modal title="Create New User" centered open={modalOpen} footer='' onCancel={handleCancel}>
                         <Form form={form} onFinish={handleSubmit} name="validateOnly" layout="vertical" autoComplete="off" style={{ paddingTop: '12px' }}>
@@ -468,8 +436,8 @@ const UserList = () => {
                             </Form.Item>
                         </Form>
                     </Modal>
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     );
 };

@@ -13,6 +13,9 @@
     height: 95%;
     width: 100%;
     margin: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 5px;
 }
 
 .userlist_card {

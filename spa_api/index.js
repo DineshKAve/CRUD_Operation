@@ -8,9 +8,9 @@ const bodyParser = require("body-parser");
 
 app.use(
     cors({
-        origin: "http://localhost:3000", // Allow only frontend origin
-        methods: "GET,POST,PUT,DELETE", // Allowed methods
-        credentials: true, // Allow cookies and credentials
+        origin: "http://localhost:3000", 
+        methods: "GET,POST,PUT,DELETE", 
+        credentials: true, 
     })
 );
 
@@ -18,8 +18,8 @@ app.use(bodyParser.json());
 
 //---------Login Concept Start------------------------
 
-const VALID_EMAIL = "admin@123.com";
-const VALID_PASSWORD = "password123";
+const VALID_EMAIL = "eve.holt@reqres.in";
+const VALID_PASSWORD = "cityslicka";
 
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
