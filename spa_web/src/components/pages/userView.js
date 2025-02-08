@@ -35,6 +35,7 @@ const UserView = () => {
         getUserLists();
     }, []);
 
+    {/* File Upload Method Start */ }
     const handleFileChange = async (event) => {
         if (!event.target.files[0]) {
             openNotificationWithIcon('warning', "Please select a file first!");
@@ -59,6 +60,7 @@ const UserView = () => {
             openNotificationWithIcon('error', "Upload failed. Please try again.");
         }
     };
+    {/* File Upload Method End */ }
 
     const handleCancel = () => {
         setModalOpen(false);
@@ -91,7 +93,36 @@ const UserView = () => {
         setEditingUser({ ...editingUser, [e.target.name]: e.target.value });
     };
 
+    const handleToggle = (data) => {
+        if (data == 'card') {
+            setTable(false);
+            setCard(true);
+        } else if (data == 'table') {
+            setCard(false);
+            setTable(true);
+            navigate('/usersList');
+        }
+    };
+
+    {/* Search Method Start */ }
+    const handleSearch = (value) => {
+        const searchText = value.toLowerCase();
+        const filtered = dataSource.filter((user) =>
+            user.firstname.toLowerCase().includes(searchText) ||
+            user.lastname.toLowerCase().includes(searchText)
+        );
+        if (searchText == '') {
+            setDataSource(filteredData);
+        } else {
+            setDataSource(filtered);
+        }
+    };
+    {/* Search Method End */ }
+
+
+    {/* Post Method Start */ }
     const handleSubmit = async (values) => {
+
         let userDetails = {
             firstname: values.firstname,
             lastname: values.lastname,
@@ -114,7 +145,10 @@ const UserView = () => {
             throw error.response ? error.response.data : error.message;
         }
     };
+    {/* Post Method End */ }
 
+
+    {/* Put Method Start */ }
     const handleUpdateSubmit = async (values) => {
 
         let userDetails = {
@@ -139,7 +173,10 @@ const UserView = () => {
             throw error.response ? error.response.data : error.message;
         }
     };
+    {/* Put Method End */ }
 
+
+    {/* Get Method Start */ }
     const getUserLists = async () => {
         const response = await axios.get(`${API_URL}/getUsersList`);
         let usersListData = [];
@@ -156,7 +193,10 @@ const UserView = () => {
         setDataSource(formattedData);
         setFilteredData(formattedData);
     };
+    {/* Get Method End */ }
 
+    
+    {/* Delete Method Start */ }
     const handleDelete = async (value) => {
         await axios.delete(`${API_URL}/deleteUsers/${value.key}`).then((response) => {
             if (response.data.status == 1) {
@@ -168,29 +208,8 @@ const UserView = () => {
             }
         })
     };
+    {/* Delete Method End */ }
 
-    const handleToggle = (data) => {
-        if (data == 'card') {
-            setTable(false);
-            setCard(true);
-        } else if (data == 'table') {
-            setCard(false);
-            setTable(true);
-            navigate('/usersList');
-        }
-    }
-    const handleSearch = (value) => {
-        const searchText = value.toLowerCase();
-        const filtered = dataSource.filter((user) =>
-            user.firstname.toLowerCase().includes(searchText) ||
-            user.lastname.toLowerCase().includes(searchText)
-        );
-        if (searchText == '') {
-            setDataSource(filteredData);
-        } else {
-            setDataSource(filtered);
-        }
-    };
 
     const UserCard = ({ user }) => {
         const [hovered, setHovered] = useState(false);
@@ -198,6 +217,7 @@ const UserView = () => {
         return (
             <Space direction="vertical" style={{ width: '100%' }} size={16}>
                 <Skeleton loading={loading}>
+                    {/* UserView Card Start */}
                     <Card
                         style={{
                             textAlign: "center",
@@ -265,6 +285,7 @@ const UserView = () => {
                         <Title level={4}>{user.firstname + " " + user.lastname}</Title>
                         <Text type="secondary">{user.email}</Text>
                     </Card>
+                    {/* UserView Card End */}
                 </Skeleton>
             </Space>
         );
@@ -276,6 +297,7 @@ const UserView = () => {
             <div className="userview_content_body">
                 <div className="userview_content_card">
                     {contextHolder}
+                    {/* UserView Header Start */}
                     <Row className="userview_card">
                         <Col xs={6} sm={6} md={2} lg={2} xl={2}>
                             <Text strong style={{ fontSize: '20px' }}>Users</Text>
@@ -309,13 +331,19 @@ const UserView = () => {
                         </Col>
                         <Col xs={12} sm={12} md={16} lg={18} xl={20} style={{ paddingTop: '10px' }}></Col>
                     </Row>
+                    {/* UserView Header End */}
+
+                    {/* UserView Card Method Start */}
                     <Row gutter={[16, 16]} justify="center" style={{ padding: "10px 35px" }}>
                         {dataSource.map((user) => (
                             <Col key={user.id} xs={24} sm={12} md={8} lg={6} xl={6}>
-                                <UserCard user={user}/>
+                                <UserCard user={user} />
                             </Col>
                         ))}
                     </Row>
+                    {/* UserView Card Method End */}
+
+                    {/* Add User Model Method Start */}
                     <Modal title="Create New User" centered open={modalOpen} footer='' onCancel={handleCancel}>
                         <Form form={form} onFinish={handleSubmit} name="validateOnly" layout="vertical" autoComplete="off" style={{ paddingTop: '12px' }}>
                             <Form.Item
@@ -384,7 +412,9 @@ const UserView = () => {
                             </Form.Item>
                         </Form>
                     </Modal>
+                    {/* Add User Model Method End */}
 
+                    {/* Edit User Model Method Start */}
                     <Modal title="Edit User" centered open={editModalOpen} footer='' onCancel={handleCancel}>
                         <Form form={form} onFinish={handleUpdateSubmit} name="validateOnly" layout="vertical" autoComplete="off" style={{ paddingTop: '12px' }}>
                             <Form.Item
@@ -459,6 +489,7 @@ const UserView = () => {
                             </Form.Item>
                         </Form>
                     </Modal>
+                    {/* Edit User Model Method End */}
                 </div>
             </div>
         </>

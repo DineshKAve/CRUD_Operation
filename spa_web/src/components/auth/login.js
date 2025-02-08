@@ -14,7 +14,7 @@ const Login = ({ onLogin }) => {
     const [errormsgs, setErrormgs] = useState(false);
     const [inCorrectError, setInCorrectError] = useState("");
 
-
+    {/* Login Form Method Start */ }
     const onFinish = async (values) => {
         setErrormgs(false);
         console.log('Success:', values);
@@ -45,6 +45,7 @@ const Login = ({ onLogin }) => {
             console.log('please enter the password');
         }
     };
+    {/* Login Form Method End */ }
 
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);

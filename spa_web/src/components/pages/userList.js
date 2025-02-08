@@ -85,6 +85,7 @@ const UserList = () => {
         },
     ];
 
+    {/* File Upload Method Start */ }
     const handleFileChange = async (event) => {
         if (!event.target.files[0]) {
             openNotificationWithIcon('warning', "Please select a file first!");
@@ -109,6 +110,7 @@ const UserList = () => {
             openNotificationWithIcon('error', "Upload failed. Please try again.");
         }
     };
+    {/* File Upload Method End */ }
 
     const handleCancel = () => {
         setModalOpen(false);
@@ -141,7 +143,36 @@ const UserList = () => {
         setEditingUser({ ...editingUser, [e.target.name]: e.target.value });
     };
 
+    const handleToggle = (data) => {
+        if (data == 'card') {
+            setTable(false);
+            setCard(true);
+            navigate('/usersView');
+        } else if (data == 'table') {
+            setCard(false);
+            setTable(true);
+        }
+    };
+
+    {/* Search Method Start */ }
+    const handleSearch = (value) => {
+        const searchText = value.toLowerCase();
+        const filtered = dataSource.filter((user) =>
+            user.firstname.toLowerCase().includes(searchText) ||
+            user.lastname.toLowerCase().includes(searchText)
+        );
+        if (searchText == '') {
+            setDataSource(filteredData);
+        } else {
+            setDataSource(filtered);
+        }
+    };
+    {/* Search Method End */ }
+
+
+    {/* Post Method Start */ }
     const handleSubmit = async (values) => {
+
         let userDetails = {
             firstname: values.firstname,
             lastname: values.lastname,
@@ -164,7 +195,10 @@ const UserList = () => {
             throw error.response ? error.response.data : error.message;
         }
     };
+    {/* Post Method End */ }
 
+
+    {/* Put Method Start */ }
     const handleUpdateSubmit = async (values) => {
 
         let userDetails = {
@@ -189,7 +223,10 @@ const UserList = () => {
             throw error.response ? error.response.data : error.message;
         }
     };
+    {/* Put Method End */ }
 
+
+    {/* Get Method Start */ }
     const getUserLists = async () => {
         const response = await axios.get(`${API_URL}/getUsersList`);
         let usersListData = [];
@@ -206,7 +243,10 @@ const UserList = () => {
         setDataSource(formattedData);
         setFilteredData(formattedData);
     };
+    {/* Get Method End */ }
 
+
+    {/* Delete Method Start */ }
     const handleDelete = async (value) => {
         await axios.delete(`${API_URL}/deleteUsers/${value.key}`).then((response) => {
             if (response.data.status == 1) {
@@ -218,35 +258,15 @@ const UserList = () => {
             }
         })
     };
+    {/* Delete Method End */ }
 
-    const handleToggle = (data) => {
-        if (data == 'card') {
-            setTable(false);
-            setCard(true);
-            navigate('/usersView');
-        } else if (data == 'table') {
-            setCard(false);
-            setTable(true);
-        }
-    }
-    const handleSearch = (value) => {
-        const searchText = value.toLowerCase();
-        const filtered = dataSource.filter((user) =>
-            user.firstname.toLowerCase().includes(searchText) ||
-            user.lastname.toLowerCase().includes(searchText)
-        );
-        if (searchText == '') {
-            setDataSource(filteredData);
-        } else {
-            setDataSource(filtered);
-        }
-    };
 
     return (
         <>
             <div className="userlist_content_body">
                 <div className="userlist_content_card">
                     {contextHolder}
+                    {/* Userlist Header Start */}
                     <Row className="userlist_card">
                         <Col xs={6} sm={6} md={2} lg={2} xl={2}>
                             <Text strong style={{ fontSize: '20px' }}>Users</Text>
@@ -280,6 +300,9 @@ const UserList = () => {
                         </Col>
                         <Col xs={12} sm={12} md={16} lg={18} xl={20} style={{ paddingTop: '10px' }}></Col>
                     </Row>
+                    {/* Userlist Header End */}
+
+                    {/* Userlist Table Start */}
                     <Col xs={24} sm={24} md={24} lg={24} xl={24}>
                         {dataSource.length <= 0 ?
                             <Space direction="vertical" style={{ width: '100%' }} size={16}>
@@ -293,6 +316,9 @@ const UserList = () => {
                                 </Skeleton>
                             </Space>}
                     </Col>
+                    {/* Userlist Table End */}
+
+                    {/* Add User Model Method Start */}
                     <Modal title="Create New User" centered open={modalOpen} footer='' onCancel={handleCancel}>
                         <Form form={form} onFinish={handleSubmit} name="validateOnly" layout="vertical" autoComplete="off" style={{ paddingTop: '12px' }}>
                             <Form.Item
@@ -361,7 +387,9 @@ const UserList = () => {
                             </Form.Item>
                         </Form>
                     </Modal>
+                    {/* Add User Model Method End */}
 
+                    {/* Edit User Model Method Start */}
                     <Modal title="Edit User" centered open={editModalOpen} footer='' onCancel={handleCancel}>
                         <Form form={form} onFinish={handleUpdateSubmit} name="validateOnly" layout="vertical" autoComplete="off" style={{ paddingTop: '12px' }}>
                             <Form.Item
@@ -436,8 +464,9 @@ const UserList = () => {
                             </Form.Item>
                         </Form>
                     </Modal>
-                </div >
-            </div >
+                    {/* Edit User Model Method End */}
+                </div>
+            </div>
         </>
     );
 };
